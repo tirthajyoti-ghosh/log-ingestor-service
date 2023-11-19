@@ -1,11 +1,14 @@
-import { FilterStrategy, textSearchFilterStrategy, dateRangeFilterStrategy } from './filter-strategies';
+import { SearchRequest } from '../shared/types';
+import { FilterStrategy, textSearchFilterStrategy, dateRangeFilterStrategy, conditionsFilterStrategy } from './filter-strategies';
 
-type FilterBuilder = (queryStringParams: Record<string, any>) => Record<string, any>;
+type FilterBuilder = {
+    (requestBody: SearchRequest): Record<string, any>;
+}
 
-export const filterBuilder: FilterBuilder = (queryStringParams) => {
+export const filterBuilder: FilterBuilder = (requestBody) => {
     const applyStrategies = (...strategies: FilterStrategy[]) => (initialConditions: Record<string, any>) =>
         strategies.reduce((conditions, strategy) => {
-            const strategyConditions = strategy(queryStringParams);
+            const strategyConditions = strategy(requestBody);
             return {
                 ...conditions,
                 ...(strategyConditions.$or ? { $or: [...(conditions.$or || []), ...strategyConditions.$or] } : strategyConditions),
@@ -13,18 +16,18 @@ export const filterBuilder: FilterBuilder = (queryStringParams) => {
         }, initialConditions);
 
     const applyAdditionalFilters = (initialConditions: Record<string, any>) =>
-        Object.keys(queryStringParams).reduce(
+        Object.keys(requestBody).reduce(
             (conditions, key) =>
-                key !== 'q' && key !== 'startDate' && key !== 'endDate'
+                key !== 'q' && key !== 'startDate' && key !== 'endDate' && key !== 'conditions'
                     ? {
                         ...conditions,
-                        [key]: { $regex: queryStringParams[key], $options: 'i' },
+                        [key]: { $regex: requestBody[key], $options: 'i' },
                     }
                     : conditions,
             initialConditions
         );
 
     return applyAdditionalFilters(
-        applyStrategies(textSearchFilterStrategy, dateRangeFilterStrategy)({})
+        applyStrategies(textSearchFilterStrategy, dateRangeFilterStrategy, conditionsFilterStrategy)({})
     );
 };

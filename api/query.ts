@@ -1,9 +1,11 @@
 import { Handler } from "@netlify/functions";
 import axios from "axios";
 import { filterBuilder } from "../lib/filter-builder";
+import { SearchRequest } from "../shared/types";
 
 const handler: Handler = async (event, context) => {
-    const filters = filterBuilder(event.queryStringParameters || {});
+    const requestBody: SearchRequest = JSON.parse(event.body || '{}');
+    const filters = filterBuilder(requestBody);
 
     // Query database
     const { data: logs } = await axios.post(`${process.env.DB_LAYER_URL}/find`, {

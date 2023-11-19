@@ -1,3 +1,5 @@
+import { Condition } from "../shared/types";
+
 export type FilterStrategy = (filters: Record<string, any>) => Record<string, any>;
 
 export const textSearchFilterStrategy: FilterStrategy = (filters) => {
@@ -15,5 +17,22 @@ export const dateRangeFilterStrategy: FilterStrategy = (filters) => {
 
     return {
         timestamp: startDate && endDate ? { $gte: startDate, $lte: endDate } : undefined,
+    };
+};
+
+const operatorMapping: Record<string, string> = {
+    '=': '$eq',
+    '!=': '$ne',
+    '~': '$regex',
+    '!~': '$not',
+};
+
+export const conditionsFilterStrategy: FilterStrategy = (filters) => {
+    const conditions: Condition[] = filters.filters ? JSON.parse(filters.filters) : [];
+
+    return {
+        $and: conditions.map((condition) => ({
+            [condition.field]: { [operatorMapping[condition.operator]]: condition.value },
+        })),
     };
 };
