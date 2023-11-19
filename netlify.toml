@@ -5,4 +5,4 @@
     to="/.netlify/functions/:splat"
     status=200
 [dev]
-    functionsPort = 8000
+    functionsPort = 3000

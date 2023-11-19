@@ -4,6 +4,19 @@ import { filterBuilder } from "../lib/filter-builder";
 import { SearchRequest } from "../shared/types";
 
 const handler: Handler = async (event, context) => {
+    if (event.httpMethod == "OPTIONS") {
+        console.log("IF OPTIONS");
+
+        return {
+            statusCode: 200,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "GET, POST, OPTION",
+            },
+        };
+    }
+
     const requestBody: SearchRequest = JSON.parse(event.body || '{}');
     const filters = filterBuilder(requestBody);
 
