@@ -28,7 +28,11 @@ const enqueueBatch = async (batch: Log[]) => {
   // Push log batches to Zeplo queue with 3 retries and 1 second delay
   // for it to be inserted into the database
   // https://zeplo.io/docs/queue
-  await axios.post(`https://zeplo.to/${process.env.DB_LAYER_URL}/insert?_token=${process.env.ZEPLO_TOKEN}&_retry=3&_delay=1`, batch);
+  await axios.post(`https://zeplo.to/${process.env.DB_LAYER_URL}/insert?_token=${process.env.ZEPLO_TOKEN}&_retry=3&_delay=1`, batch, {
+    headers: {
+        Authorization: process.env.SECRET_KEY,
+    }
+  });
 };
 
 const handler: Handler = async (event, context) => {

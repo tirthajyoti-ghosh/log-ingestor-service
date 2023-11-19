@@ -8,6 +8,10 @@ const handler: Handler = async (event, context) => {
     // Query database
     const { data: logs } = await axios.post(`${process.env.DB_LAYER_URL}/find`, {
         queryFilter: filters,
+    }, {
+        headers: {
+            Authorization: process.env.SECRET_KEY,
+        }
     });
 
     return {
