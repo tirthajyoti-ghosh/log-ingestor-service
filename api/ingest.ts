@@ -29,9 +29,7 @@ const enqueueBatch = async (batch: Log[]) => {
   // for it to be inserted into the database
   // https://zeplo.io/docs/queue
   await axios.post(`https://zeplo.to/${process.env.DB_LAYER_URL}/insert?_token=${process.env.ZEPLO_TOKEN}&_retry=3&_delay=1`, {
-    params: {
-      body: batch,
-    },
+    body: batch,
   });
 };
 
