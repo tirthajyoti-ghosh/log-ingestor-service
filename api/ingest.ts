@@ -25,7 +25,10 @@ const enqueueLogs = async (logs: Log[]) => {
 };
 
 const enqueueBatch = async (batch: Log[]) => {
-  await axios.get('http://localhost:4747/http://localhost:3000/insert', {
+  // Push log batches to Zeplo queue with 3 retries and 1 second delay
+  // for it to be inserted into the database
+  // https://zeplo.io/docs/queue
+  await axios.get(`https://zeplo.to/${process.env.DB_LAYER_URL}/insert?_token=${process.env.ZEPLO_TOKEN}&_retry=3&_delay=1`, {
     params: {
       body: batch,
     },
@@ -47,7 +50,15 @@ const handler: Handler = async (event, context) => {
     logs = [body]
   }
 
-  enqueueLogs(logs);
+  try {
+    await enqueueLogs(logs);
+  } catch (error) {
+    console.error(error);
+    return {
+      statusCode: 500,
+      body: 'Internal Server Error',
+    }
+  }
 
   return {
     statusCode: 200,
