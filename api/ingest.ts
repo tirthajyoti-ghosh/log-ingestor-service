@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { Handler } from '@netlify/functions'
 import axios from 'axios';
 
 interface Log {
@@ -32,20 +32,27 @@ const enqueueBatch = async (batch: Log[]) => {
   });
 };
 
-export default function handler(
-    request: VercelRequest,
-    response: VercelResponse,
-  ) {
-    if (request.method !== 'POST') {
-      response.status(405);
-      return;
+const handler: Handler = async (event, context) => {
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      body: 'Method Not Allowed',
     }
-
-    const { body } = request;
-    const logs: Log[] = body;
-
-    enqueueLogs(logs);
-
-    response.status(200);
   }
-  
+
+  const { body } = event;
+  const data: any = JSON.parse(body || '{}');
+  let logs = data
+  if (!Array.isArray(body)) {
+    logs = [body]
+  }
+
+  enqueueLogs(logs);
+
+  return {
+    statusCode: 200,
+    body: 'OK',
+  }
+}
+
+export { handler };
