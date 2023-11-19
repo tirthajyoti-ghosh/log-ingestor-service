@@ -16,9 +16,9 @@ const handler: Handler = async (event, context) => {
             },
         };
     }
-
+    
     const requestBody: SearchRequest = JSON.parse(event.body || '{}');
-    const filters = filterBuilder(requestBody);
+    const filters = filterBuilder(requestBody);  
 
     // Query database
     const { data: logs } = await axios.post(`${process.env.DB_LAYER_URL}/find`, {
